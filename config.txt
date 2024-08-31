@@ -1,0 +1,34 @@
+[Start]
+gia_path = F:/Users/live/Desktop/PGPL-2.3/cache/run1.bat
+yuanshen_path = F:/Program Files/Genshin Impact/Genshin Impact Game/YuanShen.exe
+bgi_path = 
+launcher_path = F:/Program Files/miHoYo Launcher/launcher.exe
+account = 18780465995
+password = xpj.061031.MHY
+
+[Enigma]
+offset_per_degree = 14.074074074074074
+decompose_relics = True
+
+[AutoFight]
+using_combat_file = ÖÓÄÇÜ½ÇÙ(·ÇÂúÃü).txt
+
+[AutoDaily]
+use_experience_point = True
+found_times = 2
+skip_auto_daily_program = False
+
+[Run]
+startgenshin = True
+update = False
+check_schedule = True
+run_enigma = True
+q_run_enigma = True
+run_daily_mission = True
+get_reward = True
+run_gia = True
+quit_genshin = True
+
+[Quit]
+key = 
+
