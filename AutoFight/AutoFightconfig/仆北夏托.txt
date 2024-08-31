@@ -1,0 +1,12 @@
+仆人 e
+北斗 e
+托马 e,q
+夏沃蕾 e,q
+北斗 e,q
+仆人 charge(0.52),attack(2),dash,attack(2),dash,attack(2),e
+北斗 e
+托马 e,q
+夏沃蕾 e,q
+北斗 e,q
+仆人 charge(0.52),attack(2),dash,attack(2),dash,attack(2),e
+

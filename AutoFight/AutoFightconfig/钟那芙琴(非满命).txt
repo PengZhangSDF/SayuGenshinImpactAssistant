@@ -1,0 +1,6 @@
+钟离 q
+那维莱特 e,charge(3)
+芙宁娜 e,q
+枫原万叶 e(hold),attack(1)
+那维莱特 e,charge(3),q,charge(3)
+枫原万叶 e(hold),attack(1)

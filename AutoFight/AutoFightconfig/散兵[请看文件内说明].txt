@@ -1,0 +1,8 @@
+钟离 s(0.1),e(hold),wait(0.3),w(0.1)
+行秋 e,q,e
+夜兰 e,e,wait(0.2),e,e,q
+芙宁娜 e,q
+珐露珊 e,wait(0.35),charge,wait(0.2),q
+云堇 e,q
+班尼特 e,q
+流浪者 e,attack(5),e
