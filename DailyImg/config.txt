@@ -1,0 +1,6 @@
+GIA_path="F:/Users/live/Desktop/PGPL-2.3/cache/run.bat"
+yuanshen_path="F:\Program Files\Genshin Impact\Genshin Impact Game\YuanShen.exe"
+BGI_path="F:\Program Files\BetterGI\BetterGI\BetterGI.exe"
+launcher_path = "F:\Program Files\miHoYo Launcher\launcher.exe"
+Account = 18780465995
+Password = xpj.061031.MHY
