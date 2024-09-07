@@ -13,7 +13,6 @@ path = config.get_config_directory()
 os.chdir(path)
 
 # 打印当前工作目录
-print("quit.py:当前工作目录：", os.getcwd())
 OUTPUT_PATH = Path(__file__).parent
 ASSETS_PATH = OUTPUT_PATH / Path(r"./assets/frame0")
 

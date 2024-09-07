@@ -20,7 +20,7 @@ skip_auto_daily_program = False
 
 [Run]
 startgenshin = True
-update = False
+update = True
 check_schedule = True
 run_enigma = True
 q_run_enigma = True

@@ -11,6 +11,7 @@ import config
 from utils.Tools import read_config_value as rcv
 import Package.log_config
 import cv2
+import AutoFight.AutoFight_tools
 import numpy as np
 path = config.get_config_directory()
 os.chdir(path)  # 更改工作目录为脚本所在目录
@@ -156,89 +157,94 @@ def perform_action(character, action):
     parts = action.split('(')
     action_name = parts[0]
     param = parts[1][:-1] if len(parts) > 1 else None
-
-    if action_name == 'skill' or action_name == 'e':  # E技能配置--草神专配
-        for attempt in range(max_retries):
-            if param == 'hold':
-                time.sleep(0.2)
-                pyautogui.keyDown('e')
-                if character == '纳西妲':
+    if not stop_event.is_set():
+        if action_name == 'skill' or action_name == 'e':  # E技能配置--草神专配
+            for attempt in range(max_retries):
+                if param == 'hold':
                     time.sleep(0.2)
-                    fast_mouse_circle(4)
-                    pyautogui.keyUp('e')
-                elif character == '枫原万叶':
-                    time.sleep(1)
                     pyautogui.keyDown('e')
-                    time.sleep(1.35)
+                    if character == '纳西妲':
+                        time.sleep(0.2)
+                        fast_mouse_circle(4)
+                        pyautogui.keyUp('e')
+                    elif character == '枫原万叶':
+                        time.sleep(1)
+                        pyautogui.keyDown('e')
+                        time.sleep(1.35)
+                    else:
+                        time.sleep(1)
+                        pyautogui.keyUp('e')
+                        time.sleep(1)
                 else:
-                    time.sleep(1)
-                    pyautogui.keyUp('e')
-                    time.sleep(1)
+                    pyautogui.press('e')
+                    time.sleep(0.35)
+
+                # 检查技能释放是否成功
+                if check_skill_release_success():
+                    logger.info(f"{character} 的技能释放成功")
+                    break
+                else:
+                    logger.warning(f"{character} 的技能释放失败，重试 {attempt + 1}/{max_retries} 次")
+                    pyautogui.press('shift')  # 释放失败后按下shift键
+                    time.sleep(0.25)
             else:
-                pyautogui.press('e')
-                time.sleep(0.35)
+                logger.error(f"{character} 的技能释放失败超过 {max_retries} 次，视为成功")
 
-            # 检查技能释放是否成功
-            if check_skill_release_success():
-                logger.info(f"{character} 的技能释放成功")
-                break
+
+        elif action_name == 'burst' or action_name == 'q':  # 大招配置
+            result = AutoFight.AutoFight_tools.is_vibrant()
+            if result:
+                pyautogui.press('q')
+                time.sleep(2.2)
             else:
-                logger.warning(f"{character} 的技能释放失败，重试 {attempt + 1}/{max_retries} 次")
-                pyautogui.press('shift')  # 释放失败后按下shift键
-                time.sleep(0.25)
-        else:
-            logger.error(f"{character} 的技能释放失败超过 {max_retries} 次，视为成功")
+                logger.info(f'{character} 大招未充能完毕')
 
-    elif action_name == 'burst' or action_name == 'q':  # 大招配置
-        pyautogui.press('q')
-        time.sleep(2.2)
+        elif action_name == 'attack':  # 普攻配置
+            duration = float(param) if param else 0.2
+            end_time = time.time() + duration
+            while time.time() < end_time:
+                pyautogui.click()
+                time.sleep(0.3)
 
-    elif action_name == 'attack':  # 普攻配置
-        duration = float(param) if param else 0.2
-        end_time = time.time() + duration
-        while time.time() < end_time:
-            pyautogui.click()
-            time.sleep(0.3)
-
-    elif action_name == 'charge':  # 重击配置--那位维莱特专配
-        duration = float(param) if param else 0.2
-        pyautogui.mouseDown()
-        if character == '那维莱特':
-            fast_mouse_circle(40)
+        elif action_name == 'charge':  # 重击配置--那位维莱特专配
+            duration = float(param) if param else 0.2
+            pyautogui.mouseDown()
+            if character == '那维莱特':
+                fast_mouse_circle(40)
+                pyautogui.mouseUp()
+                time.sleep(0.5)
+            else:
+                time.sleep(duration)
             pyautogui.mouseUp()
             time.sleep(0.5)
-        else:
+
+        elif action_name == 'wait':  # 等待 秒
+            duration = float(param) if param else 0.5
             time.sleep(duration)
-        pyautogui.mouseUp()
-        time.sleep(0.5)
 
-    elif action_name == 'wait':  # 等待 秒
-        duration = float(param) if param else 0.5
-        time.sleep(duration)
+        elif action_name == 'dash':  # 闪避
+            duration = float(param) if param else 0.5
+            pyautogui.keyDown('shift')
+            time.sleep(duration)
+            pyautogui.keyUp('shift')
+            time.sleep(0.45)
 
-    elif action_name == 'dash':  # 闪避
-        duration = float(param) if param else 0.5
-        pyautogui.keyDown('shift')
-        time.sleep(duration)
-        pyautogui.keyUp('shift')
-        time.sleep(0.45)
+        elif action_name == 'jump' or action_name == 'j':
+            pyautogui.press('space')
 
-    elif action_name == 'jump' or action_name == 'j':
-        pyautogui.press('space')
+        elif action_name == 'walk':
+            direction = param.split(',')[0]
+            duration = float(param.split(',')[1])
+            pyautogui.keyDown(direction)
+            time.sleep(duration)
+            pyautogui.keyUp(direction)
 
-    elif action_name == 'walk':
-        direction = param.split(',')[0]
-        duration = float(param.split(',')[1])
-        pyautogui.keyDown(direction)
-        time.sleep(duration)
-        pyautogui.keyUp(direction)
-
-    elif action_name in ['w', 'a', 's', 'd']:
-        duration = float(param) if param else 0.2
-        pyautogui.keyDown(action_name)
-        time.sleep(duration)
-        pyautogui.keyUp(action_name)
-    logger.info("完成动作：%s, %s", character, action)
+        elif action_name in ['w', 'a', 's', 'd']:
+            duration = float(param) if param else 0.2
+            pyautogui.keyDown(action_name)
+            time.sleep(duration)
+            pyautogui.keyUp(action_name)
+        logger.info("完成动作：%s, %s", character, action)
 
 
 def is_grayscale_region_present(x1, y1, x2, y2, saturation_threshold=0.12, area_threshold=0.77):
@@ -300,24 +306,6 @@ def using_combat_file():
     return config_file
 
 def switch_character(target_key, target_character):
-    max_attempts = 5  # 可以根据需要调整尝试次数
-    for attempt in range(max_attempts):
-        logger.debug(f"尝试切换到角色：{target_character}, 按键：{target_key}, 尝试次数：{attempt + 1}")
-        pyautogui.press(target_key)  # 按下目标角色的按键
-        time.sleep(0.1)  # 等待 0.1 秒，确保切换完成
-        current_characters = recognition_front_character()  # 获取当前屏幕上的角色编号
-
-        # 检查切换是否成功
-        if target_character in current_characters:
-            logger.info(f"成功切换到角色：{target_character}, 按键：{target_key}")
-            return True
-
-        logger.warning(f"切换失败，重试 {attempt + 1}/{max_attempts} 次")
-
-    logger.error(f"切换到角色 {target_character} 失败")
-    return False
-
-def switch_character(target_key, target_character):
     max_attempts = 30  # 设置尝试次数
     for attempt in range(max_attempts):
         pyautogui.press(target_key)  # 按下目标角色的按键
@@ -335,6 +323,7 @@ def switch_character(target_key, target_character):
     return False
 
 def main(config_file=using_combat_file()):
+    stop_event.clear()
     characters_on_screen = get_characters_from_screen()
     zhongli_in_team = '钟离' in characters_on_screen
     last_zhongli_time = time.time() - 11  # 初始化为一个较早的时间
@@ -352,7 +341,7 @@ def main(config_file=using_combat_file()):
 
     character_key_mapping = {character: str(i + 1) for i, character in enumerate(characters_on_screen)}
     dead_character_keys = []
-    time.sleep(0.5)  # 每个角色动作完成后稍作停顿
+    time.sleep(0.4)  # 每个角色动作完成后稍作停顿
 
     while not stop_event.is_set():
         logger.info("角色按键映射：%s", character_key_mapping)
@@ -383,7 +372,7 @@ def main(config_file=using_combat_file()):
                         last_zhongli_time = time.time()
                     else:
                         logger.error(f"切换到钟离失败，按键：{zhongli_key}")
-                    time.sleep(1)  # 每个角色动作完成后稍作停顿
+                    time.sleep(0.2)  # 每个角色动作完成后稍作停顿
 
                 # 添加角色切换成功检查
                 if switch_character(character_key, int(character_key)):

@@ -237,11 +237,12 @@ def main():
     times = 1
     finish = fight_in_Enigma(times)
     if finish == 'E:AF001':
+        time.sleep(1)
         x, y = Sc.CompareWithin('./img/true.png')
+        logger.debug('调试：秘境战斗死亡复活模块')
         if x != 0:
             pyautogui_Mo.click(x, y)
-            Sc.CompareWithin_Continue('./img/mjend2.png')
-            AutoEnigma.start()
+            time.sleep(1)
             go_into_enigma()
 
     while not finish:

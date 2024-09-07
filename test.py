@@ -1,108 +1,84 @@
 import cv2
 import numpy as np
-import os
-import json
+import pyautogui
+import time
 
-import utils.ScreenCompare
+def screenshot_function_forCW(x1=0, y1=0, x2=1920, y2=1080):
+    # 获取屏幕分辨率
+    screen_width, screen_height = pyautogui.size()
+    if x2 <= x1 or y2 <= y1:
+        raise ValueError("Invalid region coordinates")
 
+    # 截图指定部分
+    try:
+        screenshot = pyautogui.screenshot(region=(x1, y1, x2 - x1, y2 - y1))
+    except OSError:
+        time.sleep(1)
+        screenshot = pyautogui.screenshot(region=(x1, y1, x2 - x1, y2 - y1))
+    # 将截图转换为 OpenCV 格式
+    screenshot_cv = cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR)
 
-def load_existing_records(file_path):
-    if os.path.exists(file_path):
-        with open(file_path, 'r') as f:
-            return json.load(f)
-    return []
+    return screenshot_cv
 
+def perform_feature_matching(target_image_mat, template_image_mat, threshold=0.8, draw_on_window=False):
+    if template_image_mat is None or target_image_mat is None:
+        raise ValueError("Template image or target image is not set.")
 
-def save_teleport_points(file_path, teleport_points):
-    with open(file_path, 'w') as f:
-        json.dump(teleport_points, f, indent=4)
+    # 将目标图像转换为灰度图
+    target_image_gray = cv2.cvtColor(target_image_mat, cv2.COLOR_BGR2GRAY)
 
+    # 创建 ORB 特征检测器
+    orb = cv2.ORB_create()
 
-def is_similar(region1, region2, threshold=0.99):
-    # 使用均方误差（MSE）比较两张图片的相似度
-    if region1.shape != region2.shape:
-        return False
-    mse = np.mean((region1 - region2) ** 2)
-    return mse < (1 - threshold) * 255 ** 2
+    # 计算目标图像和模板图像的特征点和描述符
+    kp_target, des_target = orb.detectAndCompute(target_image_gray, None)
+    kp_template, des_template = orb.detectAndCompute(template_image_mat, None)
 
+    # 打印特征点和描述符
+    if des_target is None or des_template is None:
+        print("Descriptor computation failed for one or both images.")
+        return None
 
-def find_teleport_points(screenshot_path, templates, file_path='teleport_points.json', feature_area=50,
-                         min_distance=10):
-    screenshot = cv2.imread(screenshot_path)
+    print(f"Number of keypoints in target image: {len(kp_target)}")
+    print(f"Number of keypoints in template image: {len(kp_template)}")
 
-    # 加载现有记录
-    teleport_points = load_existing_records(file_path)
-    used_points = [tuple(point["coordinates"]) for point in teleport_points]
-    last_point = used_points[-1] if used_points else None
+    # 使用 BFMatcher 进行描述符匹配
+    bf = cv2.BFMatcher(cv2.NORM_HAMMING, crossCheck=True)
+    matches = bf.match(des_template, des_target)
 
-    for template_name, template_path in templates.items():
-        template = cv2.imread(template_path, cv2.IMREAD_UNCHANGED)
-        result = cv2.matchTemplate(screenshot, template, cv2.TM_CCOEFF_NORMED)
-        threshold = 0.8
-        locations = np.where(result >= threshold)
+    # 过滤匹配结果
+    good_matches = [m for m in matches if m.distance <= threshold]
 
-        for pt in zip(*locations[::-1]):
-            too_close = False
-            for used_pt in used_points:
-                if np.linalg.norm(np.array(pt) - np.array(used_pt)) < min_distance:
-                    too_close = True
-                    break
+    if not good_matches:
+        print("No good matches found.")
+        return None  # 没有匹配
 
-            if too_close:
-                continue
+    # 计算匹配点的中心坐标
+    points = np.array([kp_target[m.trainIdx].pt for m in good_matches])
+    center_x = np.mean(points[:, 0])
+    center_y = np.mean(points[:, 1])
 
-            top_left_x = max(pt[0] - feature_area // 2, 0)
-            top_left_y = max(pt[1] - feature_area // 2, 0)
-            bottom_right_x = min(pt[0] + template.shape[1] + feature_area // 2, screenshot.shape[1])
-            bottom_right_y = min(pt[1] + template.shape[0] + feature_area // 2, screenshot.shape[0])
+    # 绘制匹配结果
+    if draw_on_window:
+        matching_result = target_image_mat.copy()
+        matching_result = cv2.drawKeypoints(matching_result, kp_target, None, color=(0, 255, 0), flags=0)
+        cv2.imshow("Matches", matching_result)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
-            region = screenshot[top_left_y:bottom_right_y, top_left_x:bottom_right_x]
+    return (int(center_x), int(center_y))
 
-            similar = False
-            for point in teleport_points:
-                recorded_region = np.array(point["feature"])
-                if is_similar(region, recorded_region):
-                    similar = True
-                    break
+# 使用示例
+template_image_path = "./img/mjend.png"
+template_image = cv2.imread(template_image_path, cv2.IMREAD_GRAYSCALE)
 
-            if similar:
-                continue
+# 获取屏幕截图
+target_image_mat = screenshot_function_forCW(x1=0, y1=0, x2=1920, y2=1080)
 
-            identifier = f"{template_name}_{len([p for p in teleport_points if p['id'].startswith(template_name)]) + 1:03}"
-            relative_coords = (int(pt[0] - last_point[0]), int(pt[1] - last_point[1])) if last_point else (0, 0)
+# 进行特征匹配
+center = perform_feature_matching(target_image_mat, template_image, threshold=0.8, draw_on_window=True)
 
-            teleport_points.append({
-                "id": identifier,
-                "coordinates": (int(pt[0]), int(pt[1])),
-                "relative_coordinates": relative_coords,
-                "feature": region.tolist()
-            })
-
-            used_points.append(pt)
-            last_point = pt
-
-    save_teleport_points(file_path, teleport_points)
-
-
-def genshin_tp(identifier, file_path='teleport_points.json'):
-    teleport_points = load_existing_records(file_path)
-    for point in teleport_points:
-        if point["id"] == identifier:
-            return point["coordinates"]
-    return None
-
-
-# 示例使用
-templates = {
-    "Buddha": "./img/Buddha.png",
-    "Enigma01": "./img/enigma01.png",
-    "Enigma02": "./img/enigma02.png",
-    "TeleportPoint": "./img/teleport_point.png"
-}
-utils.ScreenCompare.screenshot_function(checkGenshin=False)
-find_teleport_points('screenshot.png', templates)
-coords = genshin_tp('Buddha002')
-if coords:
-    print(f"坐标: {coords}")
+if center:
+    print(f"Template found at center coordinates: {center}")
 else:
-    print("未找到指定的 Buddha")
+    print("Template not found.")

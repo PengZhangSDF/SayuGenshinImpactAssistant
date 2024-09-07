@@ -30,15 +30,8 @@ def UpDateGame():
         time.sleep(2)
         if a != 0:
             result = True
-    c, d = Sc.CompareWithin('./img/StarRail.png',checkGenshin=False)
-    if c != 0:
-        pyautogui.click(c, d)
-    time.sleep(1)
-    a, b = Sc.CompareWithin('./img/update01.png',0.9,checkGenshin=False)
-    if a != 0:
-        pyautogui.click(a, b)
-        lists.append('崩坏星穹铁道')
-        update = True
     if not update:
         lists.append('全部游戏处于最新版本')
     return lists
+if __name__ == '__main__':
+    UpDateGame()

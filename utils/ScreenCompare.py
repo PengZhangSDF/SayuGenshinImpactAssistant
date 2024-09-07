@@ -124,33 +124,43 @@ def CompareWithin(path_small, sim_num=0.75, notify=False,checkGenshin=True):
     # 读取小图像文件
     img_b = cv2.imread(path_small, cv2.IMREAD_UNCHANGED)
 
-    # 确保尺寸关系：a.png 尺寸大于 b.png
-    try:
-        if img_a.shape[0] < img_b.shape[0] or img_a.shape[1] < img_b.shape[1]:
-            logger.error(f"Error: 图片 {path_small} 尺寸应该大于当前屏幕截图")
-            return 0, 0
-    except AttributeError:
-        logger.error('请确认文件路径')
-        return 0, 0
-
     # 模板匹配
-    result = cv2.matchTemplate(img_a, img_b, cv2.TM_CCOEFF_NORMED)
-    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+    try:
+        result = cv2.matchTemplate(img_a, img_b, cv2.TM_CCOEFF_NORMED)
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(result)
+    except:
+        # 确保尺寸关系：a.png 尺寸大于 b.png
+        try:
+            if img_a.shape[0] < img_b.shape[0] or img_a.shape[1] < img_b.shape[1]:
+                logger.error(f"Error: 图片 {path_small} 尺寸应该大于当前屏幕截图")
+                return 0, 0
+        except AttributeError:
+            logger.error('请确认文件路径')
+            return 0, 0
 
     threshold = sim_num  # 设定阈值
-    if max_val >= threshold:
-        top_left = max_loc
-        bottom_right = (top_left[0] + img_b.shape[1], top_left[1] + img_b.shape[0])
-        target_center = ((top_left[0] + bottom_right[0]) // 2, (top_left[1] + bottom_right[1]) // 2)
-        if notify:
-            logger.info(f"{path_small} 包含当前屏幕截图. 中心坐标: {target_center}")
-        x, y = target_center
-        return x, y
-    else:
-        if notify:
-            logger.warning(f"{path_small} 不存在于当前屏幕截图在相似度 {sim_num} 下.")
-        return 0, 0
-
+    try:
+        if max_val >= threshold:
+            top_left = max_loc
+            bottom_right = (top_left[0] + img_b.shape[1], top_left[1] + img_b.shape[0])
+            target_center = ((top_left[0] + bottom_right[0]) // 2, (top_left[1] + bottom_right[1]) // 2)
+            if notify:
+                logger.info(f"{path_small} 包含当前屏幕截图. 中心坐标: {target_center}")
+            x, y = target_center
+            return x, y
+        else:
+            if notify:
+                logger.warning(f"{path_small} 不存在于当前屏幕截图在相似度 {sim_num} 下.")
+            return 0, 0
+    except:
+        # 确保尺寸关系：a.png 尺寸大于 b.png
+        try:
+            if img_a.shape[0] < img_b.shape[0] or img_a.shape[1] < img_b.shape[1]:
+                logger.error(f"Error: 图片 {path_small} 尺寸应该大于当前屏幕截图")
+                return 0, 0
+        except AttributeError:
+            logger.error('请确认文件路径')
+            return 0, 0
 
 # time.sleep(5)
 # CompareWithin('./img/screenshot.png','./img/CBKJDLR.png')
