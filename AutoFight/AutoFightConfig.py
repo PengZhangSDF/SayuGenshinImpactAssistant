@@ -192,6 +192,7 @@ def perform_action(character, action):
 
 
         elif action_name == 'burst' or action_name == 'q':  # 大招配置
+            time.sleep(0.2)
             result = AutoFight.AutoFight_tools.is_vibrant()
             if result:
                 pyautogui.press('q')
