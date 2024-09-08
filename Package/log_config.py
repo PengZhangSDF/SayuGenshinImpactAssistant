@@ -24,16 +24,22 @@ def setup_logger():
                 self.log = None
 
         def write(self, message):
-            if self.terminal:
-                self.terminal.write(message)
-            if self.log:
-                self.log.write(message)
+            try:
+                if self.terminal:
+                    self.terminal.write(message)
+                if self.log:
+                    self.log.write(message)
+            except Exception as e:
+                print(f"日志写入失败: {e}")
 
         def flush(self):
-            if self.terminal:
-                self.terminal.flush()
-            if self.log:
-                self.log.flush()
+            try:
+                if self.terminal:
+                    self.terminal.flush()
+                if self.log:
+                    self.log.flush()
+            except Exception as e:
+                print(f"日志刷新失败: {e}")
 
     class FileLoggerHandler(logging.Handler):
         def __init__(self, filename='default.log', stream=sys.stdout):
