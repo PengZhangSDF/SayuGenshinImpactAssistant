@@ -13,6 +13,7 @@ import Package.log_config
 import cv2
 import AutoFight.AutoFight_tools
 import numpy as np
+import subprocess
 path = config.get_config_directory()
 os.chdir(path)  # 更改工作目录为脚本所在目录
 print("AutoFightConfig.py:当前工作目录：", os.getcwd())  # 打印当前工作目录
@@ -325,6 +326,7 @@ def switch_character(target_key, target_character):
 
 def main(config_file=using_combat_file()):
     stop_event.clear()
+    process = subprocess.Popen(["./yap/yap.exe"], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     characters_on_screen = get_characters_from_screen()
     zhongli_in_team = '钟离' in characters_on_screen
     last_zhongli_time = time.time() - 11  # 初始化为一个较早的时间
@@ -387,7 +389,7 @@ def main(config_file=using_combat_file()):
                 time.sleep(0.2)  # 每个角色动作完成后稍作停顿
     else:
         stop_event.clear()
-
+        process.terminate()
 
 
 def stop():
