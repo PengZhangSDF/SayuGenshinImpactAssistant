@@ -1,0 +1,14 @@
+{
+  "black_list": [],
+  "click_tp": false,
+  "cos_thre": 0.9977,
+  "f_gap": 85,
+  "f_internal": 50,
+  "infer_gap": 0,
+  "pick_key": "f",
+  "press_y": true,
+  "scroll_gap": 70,
+  "single_mode": false,
+  "uid_mask": true,
+  "white_list": []
+}
