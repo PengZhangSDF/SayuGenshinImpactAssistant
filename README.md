@@ -1,4 +1,5 @@
-# SGIA V0.1.0
+# SGIA V0.1.1
+# 项目目的:在隔壁GIA或者BetrerGI出一套完整原神自动化之前让你有东西可以用
 SayuGenshinImpactAssistant
 一个支持原神从启动到结束的自动化程序
 
