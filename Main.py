@@ -42,6 +42,7 @@ def run_GIA():
     Mo.click(1840,500)
     Mo.click(900,20)
     Mo.click(900,1000)
+    utils.WhichPage.take_to_page('main')
     time.sleep(5)
     # 等待GIA完成，完全等待时间可以设置
     waiting_finish.waiting()

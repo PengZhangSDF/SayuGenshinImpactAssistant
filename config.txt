@@ -3,11 +3,11 @@ gia_path = F:/Users/live/Desktop/PGPL-2.3/cache/run1.bat
 yuanshen_path = F:/Program Files/Genshin Impact/Genshin Impact Game/YuanShen.exe
 bgi_path = 
 launcher_path = F:/Program Files/miHoYo Launcher/launcher.exe
-account = 18780465995
-password = xpj.061031.MHY
+account =
+password =
 
 [Enigma]
-offset_per_degree = 14.074074074074074
+offset_per_degree = 11.865593129361244
 decompose_relics = True
 
 [AutoFight]

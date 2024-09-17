@@ -21,7 +21,7 @@ config = configparser.ConfigParser()
 config.read(config_file_path)
 
 window = Tk()
-window.title(f"早柚原神自动化 V0.1.1                           Github主页：https://github.com/PengZhangSDF/GIAA   欢迎提交issue           ")
+window.title(f"早柚原神自动化 V0.1.2                           Github主页：https://github.com/PengZhangSDF/GIAA   欢迎提交issue           ")
 window.geometry("1032x795")
 window.configure(bg="#FFFFFF")
 button_images = {}
@@ -723,7 +723,7 @@ canvas.create_text(
     79.0,
     20.0,
     anchor="nw",
-    text="SGIA:早柚原神自动化   V0.1.1  GUI V0.1.1                                                  我的GUI学的MAA",
+    text="SGIA:早柚原神自动化   V0.1.2  GUI V0.1.2                                                 我的GUI学的MAA",
     fill="#000000",
     font=("Inter", 16 * -1)
 )
