@@ -12,11 +12,14 @@ import Package.log_config
 import threading
 from AutoFight import AutoFightConfig
 from utils.OCR import ppocr
+
 path = config.get_config_directory()
 # 更改工作目录为脚本所在目录
 os.chdir(path)
 stop_event = threading.Event()
 logger = Package.log_config.logger
+
+
 def is_grayscale_region_present(x1, y1, x2, y2, saturation_threshold=0.12, area_threshold=0.77):
     # 截取屏幕指定区域
     screenshot = pyautogui.screenshot(region=(x1, y1, x2 - x1, y2 - y1))
@@ -42,10 +45,13 @@ def is_grayscale_region_present(x1, y1, x2, y2, saturation_threshold=0.12, area_
         return True
     else:
         return False
+
+
 def autofight():
     AutoFightConfig.main()
 
-def wait_screen(path_to_img,timesmax = 200):
+
+def wait_screen(path_to_img, timesmax=200):
     x, y = Sc.CompareWithin_Continue(path_to_img, timesmax=timesmax)
     return x, y
 
@@ -69,11 +75,11 @@ def go_into_enigma():
 
 
 def recognition_dead():
-    dead0 = is_grayscale_region_present(1775,224,1825,287)
-    dead1 = is_grayscale_region_present(1778,333, 1832,384)
-    dead2 = is_grayscale_region_present(1778,427, 1830,477)
-    dead3 = is_grayscale_region_present(1778,522, 1827,578)
-    list_dead=[dead0,dead1,dead2,dead3]
+    dead0 = is_grayscale_region_present(1775, 224, 1825, 287)
+    dead1 = is_grayscale_region_present(1778, 333, 1832, 384)
+    dead2 = is_grayscale_region_present(1778, 427, 1830, 477)
+    dead3 = is_grayscale_region_present(1778, 522, 1827, 578)
+    list_dead = [dead0, dead1, dead2, dead3]
     if dead0 or dead1 or dead3 or dead2:
         dead = True
         num = 0
@@ -95,12 +101,13 @@ def recognition_dead():
             time.sleep(0.5)
             pyautogui_Mo.click(x, y)
 
+
 def recognition_dead02():
-    dead0 = is_grayscale_region_present(1775,224,1825,287)
-    dead1 = is_grayscale_region_present(1778,333, 1832,384)
-    dead2 = is_grayscale_region_present(1778,427, 1830,477)
-    dead3 = is_grayscale_region_present(1778,522, 1827,578)
-    list_dead=[dead0,dead1,dead2,dead3]
+    dead0 = is_grayscale_region_present(1775, 224, 1825, 287)
+    dead1 = is_grayscale_region_present(1778, 333, 1832, 384)
+    dead2 = is_grayscale_region_present(1778, 427, 1830, 477)
+    dead3 = is_grayscale_region_present(1778, 522, 1827, 578)
+    list_dead = [dead0, dead1, dead2, dead3]
     if dead0 or dead1 or dead3 or dead2:
         dead = True
         num = 0
@@ -115,21 +122,24 @@ def recognition_dead02():
         return False
     if dead:
         logger.warning('存在角色死亡')
+
         logger.warning(f'死亡角色：{dead_character}号角色')
         return True
+
+
 def fight_in_Enigma(times):
     x, y = wait_screen('./img/Enigma_close.png')  # 秘境提示点击
     if x != 0:
         time.sleep(0.5)
         pyautogui_Mo.click(x, y)
-    time.sleep(1)
+    time.sleep(1.5)
     recognition_dead()
     time.sleep(0.5)
     pyautogui_Mo.keyDown('w')
     while True:
-        result = ppocr(1105,524,1131,550,model='all')
-        if'F' in result or result == ['F']:
-            x=1
+        result = ppocr(1105, 524, 1131, 550, model='all')
+        if 'F' in result or result == ['F']:
+            x = 1
             pyautogui_Mo.press('f')
             break
     logger.info('检测到交互键')
@@ -144,7 +154,10 @@ def fight_in_Enigma(times):
         from AutoFight import FindTreeMain  # 我劝你别在10秒内打完！！！！！
         while True:
             x, y = Sc.CompareWithin('./img/successful.png')
-            result = ppocr(801,240,1128,335,model='all')
+            a, b = Sc.CompareWithin('./img/cancel.png')
+            if a != 0:
+                pyautogui_Mo.click(a, b)
+            result = ppocr(801, 240, 1128, 335, model='all')
 
             if result == ['挑战失败']:
                 # 队伍全部阵亡，停止自动战斗并返回错误
@@ -157,6 +170,7 @@ def fight_in_Enigma(times):
                 return 'E:AF001'
             if x != 0:
                 break
+
         logger.info('检测到挑战成功')
         if x != 0:
             AutoFightConfig.stop()
@@ -218,7 +232,7 @@ def fight_in_Enigma(times):
             else:
                 result_num = 0
 
-        if result_num  >= 20:
+        if result_num >= 20:
             pyautogui_Mo.click(x1, y1)
             finish = False
         else:
@@ -228,35 +242,29 @@ def fight_in_Enigma(times):
             finish = True
         return finish
 
+
 def main():
-    if recognition_dead02():
+    retry = False
+    if recognition_dead02() and retry == False:
         logger.warning('存在角色死亡')
         Package.CalibrateMap.newlife()
         AutoEnigma.start()
-    go_into_enigma()
+    if not retry:
+        go_into_enigma()
     times = 1
-    finish = fight_in_Enigma(times)
-    if finish == 'E:AF001':
-        time.sleep(1)
-        x, y = Sc.CompareWithin('./img/true.png')
-        logger.debug('调试：秘境战斗死亡复活模块')
-        if x != 0:
-            pyautogui_Mo.click(x, y)
-            time.sleep(1)
-            go_into_enigma()
+    finish = False
 
-    while not finish:
+    while not finish or finish == 'E:AF001':
         times = times + 1
         finish = fight_in_Enigma(times)
         if finish == 'E:AF001':
-            x, y = Sc.CompareWithin('./img/true.png')
+            time.sleep(1.5)
+            x, y = Sc.CompareWithin_Continue('./img/true.png')
+            logger.debug('调试：秘境战斗死亡复活模块')
             if x != 0:
                 pyautogui_Mo.click(x, y)
-                Sc.CompareWithin_Continue('./img/mjend2.png')
-                AutoEnigma.start()
-                go_into_enigma()
+                time.sleep(1)
     logger.info('自动秘境结束')
-
 
 
 if __name__ == '__main__':

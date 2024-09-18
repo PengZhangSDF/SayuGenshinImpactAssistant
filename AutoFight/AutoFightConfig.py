@@ -344,11 +344,10 @@ def main(config_file=using_combat_file()):
 
     character_key_mapping = {character: str(i + 1) for i, character in enumerate(characters_on_screen)}
     dead_character_keys = []
-    time.sleep(0.4)  # 每个角色动作完成后稍作停顿
 
     while not stop_event.is_set():
         logger.info("角色按键映射：%s", character_key_mapping)
-
+        time.sleep(0.3)
         # 检查死亡角色并更新死亡角色列表
         dead_index = recognition_dead()
         if dead_index is not None:
@@ -356,6 +355,7 @@ def main(config_file=using_combat_file()):
             logger.warning("检测到角色死亡，角色按键：%s", dead_index)
 
         for character, actions in character_actions:
+            time.sleep(0.05)
             character_key = character_key_mapping.get(character)
 
             if character_key in dead_character_keys:
@@ -368,14 +368,13 @@ def main(config_file=using_combat_file()):
                     zhongli_key = character_key_mapping['钟离']
                     logger.debug(f"尝试切换到钟离，按键：{zhongli_key}")
                     pyautogui.press(zhongli_key)  # 切换到钟离
-                    time.sleep(0.1)  # 等待角色切换
+                    time.sleep(0.4)  # 等待角色切换
                     # 检查切换到钟离是否成功
                     if switch_character(zhongli_key, int(character_key_mapping['钟离'])):
                         perform_action('钟离', 'e(hold)')
                         last_zhongli_time = time.time()
                     else:
                         logger.error(f"切换到钟离失败，按键：{zhongli_key}")
-                    time.sleep(0.2)  # 每个角色动作完成后稍作停顿
 
                 # 添加角色切换成功检查
                 if switch_character(character_key, int(character_key)):
@@ -386,7 +385,7 @@ def main(config_file=using_combat_file()):
                     if character == '钟离' and 'e(hold)' in actions:
                         last_zhongli_time = time.time()
 
-                time.sleep(0.2)  # 每个角色动作完成后稍作停顿
+
     else:
         stop_event.clear()
         process.terminate()
