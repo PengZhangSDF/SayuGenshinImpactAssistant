@@ -53,13 +53,11 @@ def ppocr(x1=0, y1=0, x2=1920, y2=1080, model='all', path_to_img='../screenshot.
               = 'box and text'(返回值和坐标,返回{'example':(x1,x2,y1,y2)})                """
 
 
-    logger.info("当前工作目录：%s", os.getcwd())
     return_list = []
     return_book = {}
     if path_to_img == '../screenshot.png':
         screenshot_function(x1,y1,x2,y2)
     res = ocr.run(path_to_img)
-    logger.info(res)
     try:
         text_list = [item['text'] for item in res['data']]
     except TypeError:
@@ -67,7 +65,6 @@ def ppocr(x1=0, y1=0, x2=1920, y2=1080, model='all', path_to_img='../screenshot.
     # 创建所需的字典，坐标以整数形式存储
 
     if model == 'int':
-        logger.debug(f'ppocr,model=int,list={text_list}')
         for text in text_list:
             try:
                 result = float(text)
@@ -93,7 +90,5 @@ def ppocr(x1=0, y1=0, x2=1920, y2=1080, model='all', path_to_img='../screenshot.
     else:
 
         return_list = text_list
-    logger.info(return_list)
-    print(return_list)
     return return_list
 
